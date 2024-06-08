@@ -1,4 +1,4 @@
-# Diffusion Posterior Sampling for General Noisy Inverse Problems (ICLR 2023 spotlight)
+# DPS_MRI
 
 ![result-gif1](./figures/motion_blur.gif)
 ![result-git2](./figures/super_resolution.gif)
@@ -141,4 +141,3 @@ url={https://openreview.net/forum?id=OnD9zGAGT0k}
 }
 ```
 
-# DPS_MRI
