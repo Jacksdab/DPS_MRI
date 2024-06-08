@@ -1,7 +1,7 @@
 from glob import glob
 from PIL import Image
 from typing import Callable, Optional
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import VisionDataset
 
 
@@ -33,6 +33,27 @@ def get_dataloader(dataset: VisionDataset,
                             drop_last=train)
     return dataloader
 
+@register_dataset(name='fastknee_mri')
+class MRIDataset(Dataset):
+    def __init__(self, root: str, transforms: Optional[Callable]=None):
+        super().__init__()  # Initialize the base Dataset class
+        self.root = root
+        self.transforms = transforms
+
+        self.fpaths = sorted(glob(root + '/**/*.png', recursive=True))
+        assert len(self.fpaths) > 0, "File list is empty. Check the root."
+
+    def __len__(self):
+        return len(self.fpaths)
+
+    def __getitem__(self, index: int):
+        fpath = self.fpaths[index]
+        img = Image.open(fpath).convert('RGB')
+        
+        if self.transforms is not None:
+            img = self.transforms(img)
+        
+        return img
 
 @register_dataset(name='ffhq')
 class FFHQDataset(VisionDataset):
@@ -53,3 +74,4 @@ class FFHQDataset(VisionDataset):
             img = self.transforms(img)
         
         return img
+    

@@ -10,12 +10,32 @@ from motionblur.motionblur import Kernel
 from util.resizer import Resizer
 from util.img_utils import Blurkernel, fft2_m
 
+from experimentation import *
 
 # =================
 # Operation classes
 # =================
 
 __OPERATOR__ = {}
+
+def fft2(x, dim=(0, 1), centered=True):
+    """
+    Perform 2D FFT with optional shifts on the input tensor.
+
+    Args:
+    x (torch.Tensor): Input tensor.
+    dim (tuple): Dimensions for the FFT operations.
+    centered (bool): If True, apply FFT shifts.
+
+    Returns:
+    torch.Tensor: The transformed tensor after 2D FFT with optional shifts.
+    """
+    if centered:
+        x = torch.fft.ifftshift(x, dim=dim)
+    x = torch.fft.fft2(x, dim=dim)
+    if centered:
+        x = torch.fft.fftshift(x, dim=dim)
+    return x
 
 def register_operator(name: str):
     def wrapper(cls):
@@ -51,6 +71,30 @@ class LinearOperator(ABC):
         # calculate (I - A^T * A)Y - AX
         return self.ortho_project(measurement, **kwargs) - self.forward(data, **kwargs)
 
+
+@register_operator(name='mri')
+class MRIOperator(LinearOperator):
+    '''This operator get pre-defined mask and return masked image.'''
+    def __init__(self, device):
+        self.device = device
+    
+    def forward(self, data, **kwargs):
+        try:
+            # print(data.shape)
+            return fft2(data, dim=(-2,-1)) * kwargs.get('mask', None).to(self.device)
+        except:
+            raise ValueError("Require mask")
+        
+    # def backward(self, data, **kwargs):
+    #     return ifft2(data * kwargs.get('mask', None).to(self.device), dim=(-2,-1))
+    
+    def transpose(self, data, **kwargs):
+        return data
+    
+    def ortho_project(self, data, **kwargs):
+        return data - self.forward(data, **kwargs)
+
+### Other operators, not MRI application ###
 
 @register_operator(name='noise')
 class DenoiseOperator(LinearOperator):
@@ -150,6 +194,7 @@ class InpaintingOperator(LinearOperator):
     
     def ortho_project(self, data, **kwargs):
         return data - self.forward(data, **kwargs)
+    
 
 
 class NonLinearOperator(ABC):

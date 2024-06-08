@@ -1,0 +1,9 @@
+# Ignore model checkpoints
+models/
+checkpoints/
+bkse/
+motionblur/
+# Ignore other large files or directories
+data/
+*.ckpt
+*.pt

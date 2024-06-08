@@ -191,7 +191,7 @@ class GaussianDiffusion:
             noisy_measurement = self.q_sample(measurement, t=time)
 
             # TODO: how can we handle argument for different condition method?
-            img, distance = measurement_cond_fn(x_t=out['sample'],
+            img, distance, gradients = measurement_cond_fn(x_t=out['sample'],
                                       measurement=measurement,
                                       noisy_measurement=noisy_measurement,
                                       x_prev=img,
@@ -203,8 +203,9 @@ class GaussianDiffusion:
                 if idx % 10 == 0:
                     file_path = os.path.join(save_root, f"progress/x_{str(idx).zfill(4)}.png")
                     plt.imsave(file_path, clear_color(img))
+                    plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), clear_color(gradients))
 
-        return img       
+        return img      
         
     def p_sample(self, model, x, t):
         raise NotImplementedError
