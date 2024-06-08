@@ -92,12 +92,9 @@ docker run -it --rm --gpus=all dps-docker
 <br />
 
 ### 4) Inference
-
+For MRI inference run
 ```
-python3 sample_condition.py \
---model_config=configs/model_config.yaml \
---diffusion_config=configs/diffusion_config.yaml \
---task_config={TASK-CONFIG};
+bash scripts/run_sampling_mri.sh
 ```
 
 
@@ -105,19 +102,7 @@ python3 sample_condition.py \
 
 <br />
 
-## Possible task configurations
 
-```
-# Linear inverse problems
-- configs/super_resolution_config.yaml
-- configs/gaussian_deblur_config.yaml
-- configs/motion_deblur_config.yaml
-- configs/inpainting_config.yaml
-
-# Non-linear inverse problems
-- configs/nonlinear_deblur_config.yaml
-- configs/phase_retrieval_config.yaml
-```
 
 ### Structure of task configurations
 You need to write your data directory at data.root. Default is ./data/samples which contains three sample images from FFHQ validation set.
