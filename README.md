@@ -32,7 +32,7 @@ Ex) CUDA 10.2 with pytorch 1.7.0
 ```
 git clone https://github.com/Jacksdab/DPS_MRI.git
 
-cd diffusion-posterior-sampling
+cd DPS_MRI
 ```
 
 <br />
