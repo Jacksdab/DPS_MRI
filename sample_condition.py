@@ -71,7 +71,7 @@ def main():
     # Working directory
     out_path = os.path.join(args.save_dir, measure_config['operator']['name'])
     os.makedirs(out_path, exist_ok=True)
-    for img_dir in ['input', 'recon', 'progress', 'label']:
+    for img_dir in ['input', 'recon', 'progress','progress_gradient', 'label']:
         os.makedirs(os.path.join(out_path, img_dir), exist_ok=True)
 
     # Prepare dataloader
@@ -92,6 +92,8 @@ def main():
         logger.info(f"Inference for image {i}")
         fname = str(i).zfill(5) + '.png'
         ref_img = ref_img.to(device)
+
+        print(f"Size of image is {ref_img.shape}")
 
         # Exception) In case of inpainging,
         if measure_config['operator'] ['name'] == 'inpainting':

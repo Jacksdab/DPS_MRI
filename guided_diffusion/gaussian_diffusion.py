@@ -4,6 +4,7 @@ from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import json
 from tqdm.auto import tqdm
 
 from util.img_utils import clear_color
@@ -180,6 +181,8 @@ class GaussianDiffusion:
         img = x_start
         device = x_start.device
 
+        distances = {}
+
         pbar = tqdm(list(range(self.num_timesteps))[::-1])
         for idx in pbar:
             time = torch.tensor([idx] * img.shape[0], device=device)
@@ -197,7 +200,9 @@ class GaussianDiffusion:
                                       x_prev=img,
                                       x_0_hat=out['pred_xstart'])
             img = img.detach_()
-           
+
+            distances[idx]= distance.item()
+
             pbar.set_postfix({'distance': distance.item()}, refresh=False)
             if record:
                 if idx % 10 == 0:
@@ -205,7 +210,8 @@ class GaussianDiffusion:
                     plt.imsave(file_path, clear_color(img))
                     plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), clear_color(gradients))
 
-        return img      
+
+        return img, distances   
         
     def p_sample(self, model, x, t):
         raise NotImplementedError

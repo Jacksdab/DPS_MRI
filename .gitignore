@@ -3,6 +3,9 @@ models/
 checkpoints/
 bkse/
 motionblur/
+results/
+exp/
+indist_samples/
 # Ignore other large files or directories
 *.ckpt
 *.pt

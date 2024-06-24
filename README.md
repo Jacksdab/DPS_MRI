@@ -1,4 +1,4 @@
-# Diffusion Posterior Sampling for General Noisy Inverse Problems (ICLR 2023 spotlight)
+# DPS_MRI
 
 ![result-gif1](./figures/motion_blur.gif)
 ![result-git2](./figures/super_resolution.gif)
@@ -30,7 +30,7 @@ Ex) CUDA 10.2 with pytorch 1.7.0
 ### 1) Clone the repository
 
 ```
-git clone https://github.com/DPS2022/diffusion-posterior-sampling
+git clone https://github.com/Jacksdab/DPS_MRI.git
 
 cd diffusion-posterior-sampling
 ```
@@ -92,12 +92,9 @@ docker run -it --rm --gpus=all dps-docker
 <br />
 
 ### 4) Inference
-
+For MRI inference run
 ```
-python3 sample_condition.py \
---model_config=configs/model_config.yaml \
---diffusion_config=configs/diffusion_config.yaml \
---task_config={TASK-CONFIG};
+bash scripts/run_sampling_mri.sh
 ```
 
 
@@ -105,19 +102,7 @@ python3 sample_condition.py \
 
 <br />
 
-## Possible task configurations
 
-```
-# Linear inverse problems
-- configs/super_resolution_config.yaml
-- configs/gaussian_deblur_config.yaml
-- configs/motion_deblur_config.yaml
-- configs/inpainting_config.yaml
-
-# Non-linear inverse problems
-- configs/nonlinear_deblur_config.yaml
-- configs/phase_retrieval_config.yaml
-```
 
 ### Structure of task configurations
 You need to write your data directory at data.root. Default is ./data/samples which contains three sample images from FFHQ validation set.
@@ -156,4 +141,3 @@ url={https://openreview.net/forum?id=OnD9zGAGT0k}
 }
 ```
 
-# DPS_MRI

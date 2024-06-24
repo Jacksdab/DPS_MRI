@@ -2,6 +2,7 @@ from functools import partial
 import os
 import argparse
 import yaml
+import json 
 
 import torch
 import torchvision.transforms as transforms
@@ -101,12 +102,14 @@ def main():
     # Prepare dataloader
     data_config = task_config['data']
     transform = transforms.Compose([
+    transforms.Resize((256, 256)),
     transforms.ToTensor(),  # Converts to tensor (0,1) and scales it from 0-255 to 0-1
-    transforms.Normalize((0.5,), (0.5,))  # Normalization values for grayscale images 
+    # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Normalization values for grayscale images 
     ])
     dataset = get_dataset(**data_config, transforms=transform)
     loader = get_dataloader(dataset, batch_size=1, num_workers=0, train=False)
 
+    
         
     # Do Inference
     for i, ref_img in enumerate(loader):
@@ -114,9 +117,16 @@ def main():
         fname = str(i).zfill(5) + '.png'
         ref_img = ref_img.to(device)
 
+        print(f"Size of image is {ref_img.shape}")
+        mean = ref_img.mean(dim=(2, 3))
+        std = ref_img.std(dim=(2, 3))
+    
+        print("Mean of each channel:", mean)
+        print("Standard deviation of each channel:", std)
+
         # Exception) In case of inpainging,
         if measure_config['operator'] ['name'] == 'mri':
-            mask = get_mask(torch.zeros([1, 1, 320, 320]), 320, 
+            mask = get_mask(torch.zeros([1, 3, 256, 256]), 256, 
                                  1)
             measurement_cond_fn = partial(cond_method.conditioning, mask=mask)
             sample_fn = partial(sample_fn, measurement_cond_fn=measurement_cond_fn)
@@ -133,15 +143,22 @@ def main():
          
         # Sampling
         x_start = torch.randn(ref_img.shape, device=device).requires_grad_()
-        sample = sample_fn(x_start=x_start, measurement=y, record=True, save_root=out_path)
+        sample, distances = sample_fn(x_start=x_start, measurement=y, record=True, save_root=out_path)
 
-        fname = str(i).zfill(5) + '.png'
+        fname = str(i).zfill(5) + '_acc_factor_2.png'
         k_to_image = ifft2(y, dim=(-2,-1))
 
         plt.imsave(os.path.join(out_path, 'input', 'k_space.png'), clear_color(torch.log(y+1e-9)))
         plt.imsave(os.path.join(out_path, 'input', 'inversed_image.png'), clear_color(k_to_image))
         plt.imsave(os.path.join(out_path, 'label', fname), clear_color(ref_img))
         plt.imsave(os.path.join(out_path, 'recon', fname), clear_color(sample))
+
+        # Saving distances
+        # Saving distances to compare
+        filepath = os.path.join(out_path, f"distances_correctnormalization_resize_gradientupdate.json")
+        print(f"saved distances in {filepath}")
+        with open(filepath, 'w') as file:
+            json.dump(distances, file)
 
 if __name__ == '__main__':
     #print("Hello world")

@@ -10,7 +10,7 @@ if torch.cuda.is_available()
 else torch.device("cpu")
 )
 
-def get_mask(img, size, batch_size, type='uniform1d', acc_factor=1.0001, center_fraction=0.04, fix=False):
+def get_mask(img, size, batch_size, type='uniform1d', acc_factor=2, center_fraction=0.04, fix=False):
     mux_in = size ** 2
     if type.endswith('2d'):
         Nsamp = mux_in // acc_factor
@@ -78,14 +78,14 @@ def prepare_im(load_dir, image_size, device):
 
 
 # # Load the .npy file
-# fname = './data/samples/001.npy'
-# saveroot_mri = './data/samples/mri'
+fname = './data/samples/001.npy'
+saveroot_mri = './data/samples/mri'
 # saveroot = './data/samples/medical.png'
 # saveroot_mask = './data/samples/medical_mask.png'
 # img = torch.from_numpy(np.load(fname))
 # ### Taking absolute, but this is now handled in function from torch ###
 # # img = torch.abs(img)
-# # print(img.shape)
+# print(img.shape)
 # # Mask 
 # mask = get_mask(torch.zeros([1, 1, 320, 320]), 320, 
 #                                 1)
@@ -112,3 +112,11 @@ def prepare_im(load_dir, image_size, device):
 # plt.imsave(saveroot_mri + "_input.png", np.abs(Apy_sv), cmap='gray')
 # x_orig_sv = clear(x_orig)
 # plt.imsave(saveroot_mri + "_label.png", np.abs(x_orig_sv), cmap='gray')
+
+from direct.data.datasets import FastMRIDataset
+dataset_path = "/projects/0/prjs0756/data/"
+dataset = FastMRIDataset(data_root=dataset_path)
+
+random_idx = 100
+sample = dataset[random_idx]
+print("Sample keys: ", sample.keys())

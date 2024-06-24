@@ -12,6 +12,27 @@ from packaging import version
 if version.parse(torch.__version__) >= version.parse("1.7.0"):
     import torch.fft  # type: ignore
 
+def ifft2(y, dim=(0, 1), centered=True):
+    """
+    Perform 2D inverse FFT with optional shifts on the under-sampled k-space.
+
+    Args:
+    y (torch.Tensor): Undersampled k-space (frequency domain).
+    sampling_mask (torch.Tensor): Sampling mask to be applied.
+    dim (tuple): Dimensions for the FFT operations.
+    centered (bool): If True, apply FFT shifts.
+
+    Returns:
+    torch.Tensor: The transformed tensor after 2D inverse FFT with optional shifts.
+    """
+    if centered:
+        x = torch.fft.ifftshift(y, dim=dim)
+    else:
+        x = y
+    x = torch.fft.ifft2(x, dim=dim)
+    if centered:
+        x = torch.fft.fftshift(x, dim=dim)
+    return x
 
 def fft2c_old(data: torch.Tensor, norm: str = "ortho") -> torch.Tensor:
     """

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import torch
-
+from .measurements import MRIOperator
+from util.fastmri_utils import ifft2
 __CONDITIONING_METHOD__ = {}
 
 def register_conditioning_method(name: str):
@@ -28,6 +29,10 @@ class ConditioningMethod(ABC):
     def grad_and_value(self, x_prev, x_0_hat, measurement, **kwargs):
         if self.noiser.__name__ == 'gaussian':
             difference = measurement - self.operator.forward(x_0_hat, **kwargs)
+            # inverse FFT specific for MRI reconstruction
+            if isinstance(self.operator, MRIOperator):
+                # print(f"size of difference is: {difference.shape}")
+                difference = ifft2(difference, dim=(-2,-1))
             norm = torch.linalg.norm(difference)
             norm_grad = torch.autograd.grad(outputs=norm, inputs=x_prev)[0] #TODO
         
@@ -80,10 +85,12 @@ class PosteriorSampling(ConditioningMethod):
     def __init__(self, operator, noiser, **kwargs):
         super().__init__(operator, noiser)
         self.scale = kwargs.get('scale', 1.0)
+        self.operator = operator
 
     def conditioning(self, x_prev, x_t, x_0_hat, measurement, **kwargs):
         norm_grad, norm = self.grad_and_value(x_prev=x_prev, x_0_hat=x_0_hat, measurement=measurement, **kwargs)
         x_t -= norm_grad * self.scale
+
         return x_t, norm, norm_grad
         
 @register_conditioning_method(name='ps+')
