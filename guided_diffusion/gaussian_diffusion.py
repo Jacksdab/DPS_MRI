@@ -174,7 +174,8 @@ class GaussianDiffusion:
                       measurement,
                       measurement_cond_fn,
                       record,
-                      save_root):
+                      save_root,
+                      save_gradients = False):
         """
         The function used for sampling from noise.
         """ 
@@ -208,7 +209,8 @@ class GaussianDiffusion:
                 if idx % 10 == 0:
                     file_path = os.path.join(save_root, f"progress/x_{str(idx).zfill(4)}.png")
                     plt.imsave(file_path, clear_color(img))
-                    plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), clear_color(gradients))
+                    if save_gradients:
+                        plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), clear_color(gradients))
 
 
         return img, distances   

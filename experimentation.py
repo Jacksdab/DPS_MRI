@@ -112,9 +112,10 @@ saveroot_mri = './data/samples/mri'
 # plt.imsave(saveroot_mri + "_input.png", np.abs(Apy_sv), cmap='gray')
 # x_orig_sv = clear(x_orig)
 # plt.imsave(saveroot_mri + "_label.png", np.abs(x_orig_sv), cmap='gray')
-
+import direct
 from direct.data.datasets import FastMRIDataset
 dataset_path = "/projects/0/prjs0756/data/"
+dataset_path = "/data/groups/aiforoncology/archive/reconstruction/reconstruction/fastmri/brain/multicoil_train"
 dataset = FastMRIDataset(data_root=dataset_path)
 
 random_idx = 100

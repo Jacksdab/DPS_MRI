@@ -85,6 +85,7 @@ class PosteriorSampling(ConditioningMethod):
     def __init__(self, operator, noiser, **kwargs):
         super().__init__(operator, noiser)
         self.scale = kwargs.get('scale', 1.0)
+        print(f"Using scale factor: {self.scale}")
         self.operator = operator
 
     def conditioning(self, x_prev, x_t, x_0_hat, measurement, **kwargs):

@@ -54,8 +54,12 @@ def main():
     parser.add_argument('--task_config', type=str)
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--save_dir', type=str, default='./results')
+    # accelaration factor
+    parser.add_argument('--acc_factor', type=int, default = 1.5)
+    parser.add_argument('--scale_factor', type=int, default = 0.5)
+    # saving gradients
+    # parser.add_argument('--save_gradients', action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
-   
     # logger
     logger = get_logger()
     
@@ -85,6 +89,9 @@ def main():
 
     # Prepare conditioning method
     cond_config = task_config['conditioning']
+    # Allow for hyperparameter search
+    cond_config['params']['scale'] = args.scale_factor
+    # 
     cond_method = get_conditioning_method(cond_config['method'], operator, noiser, **cond_config['params'])
     measurement_cond_fn = cond_method.conditioning
     logger.info(f"Conditioning method : {task_config['conditioning']['method']}")
@@ -127,7 +134,7 @@ def main():
         # Exception) In case of inpainging,
         if measure_config['operator'] ['name'] == 'mri':
             mask = get_mask(torch.zeros([1, 3, 256, 256]), 256, 
-                                 1)
+                                 1, acc_factor= args.acc_factor)
             measurement_cond_fn = partial(cond_method.conditioning, mask=mask)
             sample_fn = partial(sample_fn, measurement_cond_fn=measurement_cond_fn)
 
@@ -145,7 +152,8 @@ def main():
         x_start = torch.randn(ref_img.shape, device=device).requires_grad_()
         sample, distances = sample_fn(x_start=x_start, measurement=y, record=True, save_root=out_path)
 
-        fname = str(i).zfill(5) + '_acc_factor_2.png'
+        fname = str(i).zfill(5) + f'_{args.acc_factor}' + f'_{args.scale_factor}' + '.png'
+
         k_to_image = ifft2(y, dim=(-2,-1))
 
         plt.imsave(os.path.join(out_path, 'input', 'k_space.png'), clear_color(torch.log(y+1e-9)))
