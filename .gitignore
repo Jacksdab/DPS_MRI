@@ -1,11 +1,21 @@
 # Ignore model checkpoints
 models/
 checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+data/
 bkse/
 motionblur/
 results/
 exp/
 indist_samples/
+experimentation.py
+sample_condition_mri.py
+sample_condition_mri_test.py
 # Ignore other large files or directories
 *.ckpt
 *.pt
+*.json
+*.ipynb

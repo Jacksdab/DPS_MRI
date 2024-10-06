@@ -167,7 +167,8 @@ class GaussianDiffusion:
             == x_start.shape[0]
         )
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
-
+    
+    
     def p_sample_loop(self,
                       model,
                       x_start,
@@ -175,7 +176,7 @@ class GaussianDiffusion:
                       measurement_cond_fn,
                       record,
                       save_root,
-                      save_gradients = False):
+                      save_gradients = True):
         """
         The function used for sampling from noise.
         """ 
@@ -201,19 +202,21 @@ class GaussianDiffusion:
                                       x_prev=img,
                                       x_0_hat=out['pred_xstart'])
             img = img.detach_()
-
+            
+            
             distances[idx]= distance.item()
 
             pbar.set_postfix({'distance': distance.item()}, refresh=False)
             if record:
                 if idx % 10 == 0:
                     file_path = os.path.join(save_root, f"progress/x_{str(idx).zfill(4)}.png")
-                    plt.imsave(file_path, clear_color(img))
+                    plt.imsave(file_path, (np.abs(clear_color(real_to_nchw_comp(img)))),  cmap='gray')
                     if save_gradients:
-                        plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), clear_color(gradients))
+                        # print(f"gradient size: {gradients.shape}")
+                        plt.imsave(os.path.join(save_root, f"progress_gradient/x_{str(idx).zfill(4)}.png"), np.abs(clear_color(real_to_nchw_comp(gradients))),  cmap='gray')
 
 
-        return img, distances   
+        return real_to_nchw_comp(img), distances   
         
     def p_sample(self, model, x, t):
         raise NotImplementedError
@@ -418,6 +421,17 @@ class DDIM(SpacedDiffusion):
 # =================
 # Helper functions
 # =================
+
+
+def real_to_nchw_comp(x):
+        """
+        [1, 2, 320, 320] real --> [1, 1, 320, 320] comp
+        """
+        if len(x.shape) == 4:
+            x = x[:, 0:1, :, :] + x[:, 1:2, :, :] * 1j
+        elif len(x.shape) == 3:
+            x = x[0:1, :, :] + x[1:2, :, :] * 1j
+        return x
 
 def get_named_beta_schedule(schedule_name, num_diffusion_timesteps):
     """

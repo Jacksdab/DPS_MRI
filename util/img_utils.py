@@ -12,6 +12,27 @@ from .fastmri_utils import fft2c_new, ifft2c_new
 """
 Helper functions for new types of inverse problems
 """
+def _ifft2(y, dim=(0, 1), centered=True):
+    """
+    Perform 2D inverse FFT with optional shifts on the under-sampled k-space.
+
+    Args:
+    y (torch.Tensor): Undersampled k-space (frequency domain).
+    sampling_mask (torch.Tensor): Sampling mask to be applied.
+    dim (tuple): Dimensions for the FFT operations.
+    centered (bool): If True, apply FFT shifts.
+
+    Returns:
+    torch.Tensor: The transformed tensor after 2D inverse FFT with optional shifts.
+    """
+    if centered:
+        x = torch.fft.ifftshift(y, dim=dim)
+    else:
+        x = y
+    x = torch.fft.ifft2(x, dim=dim)
+    if centered:
+        x = torch.fft.fftshift(x, dim=dim)
+    return x
 
 def fft2(x):
   """ FFT with shifting DC to the center of the image"""
@@ -43,10 +64,12 @@ def clear(x):
 
 
 def clear_color(x):
-    if torch.is_complex(x):
-        x = torch.abs(x)
+    # if torch.is_complex(x):
+    #     x = torch.abs(x)
     x = x.detach().cpu().squeeze().numpy()
-    return normalize_np(np.transpose(x, (1, 2, 0)))
+    # print(f"clear color size is:{x.shape}")
+    # normalize_np(np.transpose(x, (1, 2, 0)))
+    return x
 
 
 def normalize_np(img):
@@ -249,6 +272,11 @@ def get_gaussian_kernel(kernel_size=31, std=0.5):
     k = k.astype(np.float32)
     return k
 
+def normalize_torch(img):
+    """ Normalize img in arbitrary range to [0, 1] """
+    img -= torch.min(img)
+    img /= torch.max(img)
+    return img
 
 def init_kernel_torch(kernel, device="cuda:0"):
     h, w = kernel.shape

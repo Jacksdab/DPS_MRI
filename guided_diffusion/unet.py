@@ -40,11 +40,12 @@ def create_model(
     use_fp16=False,
     use_new_attention_order=False,
     model_path='',
+    **kwargs
 ):
     if channel_mult == "":
         if image_size == 512:
             channel_mult = (0.5, 1, 1, 2, 2, 4, 4)
-        elif image_size == 256:
+        elif image_size == 256 or image_size == 320:
             channel_mult = (1, 1, 2, 2, 4, 4)
         elif image_size == 128:
             channel_mult = (1, 1, 2, 3, 4)
@@ -66,9 +67,9 @@ def create_model(
 
     model= UNetModel(
         image_size=image_size,
-        in_channels=3,
+        in_channels=kwargs["in_channels"],
         model_channels=num_channels,
-        out_channels=(3 if not learn_sigma else 6),
+        out_channels=(kwargs["in_channels"] if not learn_sigma else kwargs["in_channels"] * 2),
         num_res_blocks=num_res_blocks,
         attention_resolutions=tuple(attention_ds),
         dropout=dropout,
