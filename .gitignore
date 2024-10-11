@@ -10,9 +10,10 @@ bkse/
 motionblur/
 results/
 exp/
+output/
 indist_samples/
 experimentation.py
-sample_condition_mri.py
+sample_condition.py
 sample_condition_mri_test.py
 # Ignore other large files or directories
 *.ckpt
